@@ -14,14 +14,17 @@ import me.confor.velocity.chat.Config;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.slf4j.Logger;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class GlobalChat {
     private final ProxyServer server;
@@ -29,12 +32,19 @@ public class GlobalChat {
     private final Path dataDirectory;
     private Config config;
 
+    // For tracking first-join
+    private final Set<String> seenPlayers;
+    private final Path seenFile;
+
     public GlobalChat(ProxyServer server, Logger logger, Path dataDirectory) {
         this.server = server;
         this.logger = logger;
         this.dataDirectory = dataDirectory;
 
         this.config = new Config(dataDirectory);
+
+        this.seenFile = dataDirectory.resolve("seenPlayers.txt");
+        this.seenPlayers = loadSeen();
     }
 
     @Subscribe
@@ -81,26 +91,38 @@ public class GlobalChat {
         Optional<RegisteredServer> previousServer = event.getPreviousServer();
 
         String player = event.getPlayer().getUsername();
+        String uuid = event.getPlayer().getUniqueId().toString();
         String server = currentServer.getServerInfo().getName();
 
-        if (previousServer.isPresent()) {
-            if (!config.SWITCH_ENABLE)
-                return;
-
-            Component msg = parseMessage(config.SWITCH_FORMAT, List.of(
-                new ChatTemplate("player", player, false),
-                new ChatTemplate("server", server, false),
-                new ChatTemplate("previous_server", previousServer.get().getServerInfo().getName(), false)
+        // First-time join
+        if (previousServer.isEmpty() && config.FIRST_JOIN_ENABLE && !seenPlayers.contains(uuid)) {
+            Component msg = parseMessage(config.FIRST_JOIN_FORMAT, List.of(
+                    new ChatTemplate("player", player, false),
+                    new ChatTemplate("server", server, false)
             ));
+            if (config.FIRST_JOIN_PASSTHROUGH) sendMessage(msg);
+            else sendMessage(msg, currentServer);
 
-            sendMessage(msg);
-        } else {
-            if (!config.JOIN_ENABLE)
-                return;
+            markSeen(uuid);
+            return;
+        }
 
+        // Regular join
+        if (previousServer.isEmpty()) {
+            if (!config.JOIN_ENABLE) return;
             Component msg = parseMessage(config.JOIN_FORMAT, List.of(
-                new ChatTemplate("player", player, false),
-                new ChatTemplate("server", server, false)
+                    new ChatTemplate("player", player, false),
+                    new ChatTemplate("server", server, false)
+            ));
+            if (config.JOIN_PASSTHROUGH) sendMessage(msg);
+            else sendMessage(msg, currentServer);
+        } else {
+            // Server switch
+            if (!config.SWITCH_ENABLE) return;
+            Component msg = parseMessage(config.SWITCH_FORMAT, List.of(
+                    new ChatTemplate("player", player, false),
+                    new ChatTemplate("server", server, false),
+                    new ChatTemplate("previous_server", previousServer.get().getServerInfo().getName(), false)
             ));
 
             if (!config.JOIN_PASSTHROUGH)
@@ -141,29 +163,49 @@ public class GlobalChat {
             sendMessage(msg);
     }
 
+    private Set<String> loadSeen() {
+        try {
+            if (!Files.exists(seenFile)) Files.createFile(seenFile);
+            return new HashSet<>(Files.readAllLines(seenFile));
+        } catch (IOException e) {
+            throw new RuntimeException("Couldn't load seen players file", e);
+        }
+    }
+
+    private void markSeen(String uuid) {
+        if (seenPlayers.add(uuid)) {
+            try {
+                Files.write(seenFile, (uuid + System.lineSeparator()).getBytes(),
+                        java.nio.file.StandardOpenOption.APPEND);
+            } catch (IOException e) {
+                logger.error("Failed to save seen player {}", uuid, e);
+            }
+        }
+    }
+
     private Component parseMessage(String input, List<ChatTemplate> templates) {
         List<TagResolver.Single> list = new ArrayList<>();
 
         for (ChatTemplate tmpl : templates) {
-            if (tmpl.parse)
+            if (tmpl.parse) {
                 list.add(Placeholder.parsed(tmpl.name, tmpl.value));
-            else
-                list.add(Placeholder.parsed(tmpl.name, Component.text(tmpl.value).content()));
+            } else {
+                list.add(Placeholder.parsed(tmpl.name,
+                        Component.text(tmpl.value).content()));
+            }
         }
-
-        return MiniMessage.miniMessage().deserialize(input, list.toArray(TagResolver[]::new));
+        return MiniMessage.miniMessage().deserialize(input,
+                list.toArray(new TagResolver[0]));
     }
 
     private void sendMessage(Component msg) {
-        for (Player player : this.server.getAllPlayers())
-            player.sendMessage(msg);
+        for (Player p : server.getAllPlayers()) p.sendMessage(msg);
     }
 
-    private void sendMessage(Component msg, RegisteredServer excludedServer) {
-        for (RegisteredServer server : this.server.getAllServers())
-            if (server != excludedServer) {
-                server.sendMessage(msg);
-            }
+    private void sendMessage(Component msg, RegisteredServer excluded) {
+        for (RegisteredServer srv : server.getAllServers()) {
+            if (!srv.equals(excluded)) srv.sendMessage(msg);
+        }
     }
 
     static final class ChatTemplate {

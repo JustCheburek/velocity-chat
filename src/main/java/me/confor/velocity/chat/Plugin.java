@@ -33,10 +33,6 @@ public class Plugin {
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
-        this.register(new GlobalChat(this.server, this.logger, this.dataDirectory));
-    }
-
-    private void register(Object x) {
-        this.server.getEventManager().register(this, x);
+        server.getEventManager().register(this, new GlobalChat(server, logger, dataDirectory));
     }
 }

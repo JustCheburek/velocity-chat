@@ -14,10 +14,10 @@ import java.nio.file.Path;
 import java.util.regex.Pattern;
 
 public class Config {
-    static final long CONFIG_VERSION = 6;
+    static final long CONFIG_VERSION = 7;
 
-    Path dataDir;
-    Toml toml;
+    private final Path dataDir;
+    private Toml toml;
 
     // is there a less ugly way of doing this?
     // defaults are set in loadConfigs()
@@ -35,6 +35,10 @@ public class Config {
     public boolean JOIN_ENABLE;
     public boolean JOIN_PASSTHROUGH;
     public String JOIN_FORMAT;
+
+    public boolean FIRST_JOIN_ENABLE;
+    public boolean FIRST_JOIN_PASSTHROUGH;
+    public String FIRST_JOIN_FORMAT;
 
     public boolean LEAVE_ENABLE;
     public boolean LEAVE_PASSTHROUGH;
@@ -60,53 +64,64 @@ public class Config {
     }
 
     private void loadFile() {
-        File dataDirectoryFile = this.dataDir.toFile();
-        if (!dataDirectoryFile.exists())
-            dataDirectoryFile.mkdir(); // TODO ensure it succeeds
+        File dir = dataDir.toFile();
+        if (!dir.exists()) dir.mkdir();
 
-        File dataFile = new File(dataDirectoryFile, "config.toml");
-
-        // create default config if it doesn't exist
-        if (!dataFile.exists()) {
-            try {
-                InputStream in = this.getClass().getResourceAsStream("/config.toml");
-                Files.copy(in, dataFile.toPath());
+        File file = new File(dir, "config.toml");
+        if (!file.exists()) {
+            try (InputStream in = getClass().getResourceAsStream("/config.toml")) {
+                Files.copy(in, file.toPath());
             } catch (IOException e) {
-                throw new RuntimeException("ERROR: Can't write default configuration file (permissions/filesystem error?)");
+                throw new RuntimeException("ERROR: Can't write default configuration file", e);
             }
         }
 
-        this.toml = new Toml().read(dataFile);
-
-        // make sure the config makes sense for the current plugin's version
+        this.toml = new Toml().read(file);
         long version = this.toml.getLong("config_version", 0L);
         if (version != CONFIG_VERSION) {
-            throw new RuntimeException("ERROR: Can't use the existing configuration file: version mismatch (intended for another, older version?)");
+            throw new RuntimeException("ERROR: Config version mismatch.");
         }
     }
 
     public void loadConfigs() {
-        this.GLOBAL_CHAT_ENABLED = this.toml.getBoolean("chat.enable", true);
-        this.GLOBAL_CHAT_TO_CONSOLE = this.toml.getBoolean("chat.log_to_console", false);
-        this.GLOBAL_CHAT_PASSTHROUGH = this.toml.getBoolean("chat.passthrough", true);
-        this.GLOBAL_CHAT_ALLOW_MSG_FORMATTING = this.toml.getBoolean("chat.parse_player_messages", false);
-        this.GLOBAL_CHAT_FORMAT = this.toml.getString("chat.format", "<<player>> <message>");
+        // global chat
+        GLOBAL_CHAT_ENABLED = toml.getBoolean("chat.enable", true);
+        GLOBAL_CHAT_TO_CONSOLE = toml.getBoolean("chat.log_to_console", false);
+        GLOBAL_CHAT_PASSTHROUGH = toml.getBoolean("chat.passthrough", true);
+        GLOBAL_CHAT_ALLOW_MSG_FORMATTING = toml.getBoolean("chat.parse_player_messages", false);
+        GLOBAL_CHAT_FORMAT = toml.getString("chat.format", "<<player>> <message>");
 
-        this.URLS_CLICKABLE = this.toml.getBoolean("urls.clickable", true);
-        this.URLS_PATTERN = this.toml.getString("urls.pattern", "https?:\\/\\/\\S+");
+        // urls
+        URLS_CLICKABLE = toml.getBoolean("urls.clickable", true);
+        URLS_PATTERN = toml.getString("urls.pattern", "https?:\\/\\/\\S+");
 
-        this.JOIN_ENABLE = this.toml.getBoolean("join.enable", false);
-        this.JOIN_PASSTHROUGH = this.toml.getBoolean("join.passthrough", false);
-        this.JOIN_FORMAT = this.toml.getString("join.format", "<yellow><player> joined <server></yellow>");
+        // join
+        JOIN_ENABLE = toml.getBoolean("join.enable", false);
+        JOIN_PASSTHROUGH = toml.getBoolean("join.passthrough", false);
+        JOIN_FORMAT = toml.getString("join.format", "<yellow><player> joined <server></yellow>");
 
-        this.LEAVE_ENABLE = this.toml.getBoolean("leave.enable", false);
-        this.LEAVE_PASSTHROUGH = this.toml.getBoolean("leave.passthrough", false);
-        this.LEAVE_FORMAT = this.toml.getString("leave.format", "<yellow><player> left <server></yellow>");
+        // first join
+        FIRST_JOIN_ENABLE = toml.getBoolean("first_join.enable", true);
+        FIRST_JOIN_PASSTHROUGH = toml.getBoolean("first_join.passthrough", false);
+        FIRST_JOIN_FORMAT = toml.getString(
+                "first_join.format",
+                "<green>Welcome <player> to <server> for the first time!</green>"
+        );
 
-        this.SWITCH_ENABLE = this.toml.getBoolean("switch.enable", true);
-        this.SWITCH_FORMAT = this.toml.getString("switch.format", "<yellow><player> switched from <previous_server> to <server></yellow>");
+        // leave
+        LEAVE_ENABLE = toml.getBoolean("leave.enable", false);
+        LEAVE_PASSTHROUGH = toml.getBoolean("leave.passthrough", false);
+        LEAVE_FORMAT = toml.getString("leave.format", "<yellow><player> left <server></yellow>");
 
-        this.DISCONNECT_ENABLE = this.toml.getBoolean("disconnect.enable", true);
-        this.DISCONNECT_FORMAT = this.toml.getString("disconnect.format", "<yellow><player> was disconnected</yellow>");
+        // disconnect
+        DISCONNECT_ENABLE = toml.getBoolean("disconnect.enable", true);
+        DISCONNECT_FORMAT = toml.getString("disconnect.format", "<yellow><player> was disconnected</yellow>");
+
+        // switch
+        SWITCH_ENABLE = toml.getBoolean("switch.enable", true);
+        SWITCH_FORMAT = toml.getString(
+                "switch.format",
+                "<yellow><player> switched from <previous_server> to <server></yellow>"
+        );
     }
 }

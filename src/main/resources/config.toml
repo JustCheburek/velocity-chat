@@ -1,4 +1,4 @@
-config_version = 6
+config_version = 7
 
 [chat]
 # enable global chat?
@@ -37,6 +37,11 @@ enable = true
 # useful for servers that have the default join message disabled (via mod / plugin)
 passthrough = false
 format = "<yellow><player> joined <server></yellow>"
+
+[first_join]
+enable = true
+passthrough = false
+format = "<green>Welcome <player> to <server> for the first time!</green>"
 
 [leave]
 # send a chat message when a player leaves the proxy?
