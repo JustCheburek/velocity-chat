@@ -25,6 +25,10 @@ parse_player_messages = true
 # Global chat format, you can use minimessage tags here
 format = "<player> <gray>> <reset><message>"
 
+# Messages
+no_permission = "<red>У вас нет прав для выполнения этой команды."
+config_reloaded = "<green>Конфигурация плагина Chat успешно перезагружена."
+
 [urls]
 # Should URLs in global chat be clickable?
 clickable = true
@@ -101,16 +105,27 @@ subtitle = "<yellow><player> упомянул вас"
 # Enable private messaging (/msg, /tell, /pm, /w commands)
 enable = true
 
+# Command aliases for private messaging
+aliases = ["msg", "tell", "pm", "w", "message"]
+
 # Log private messages to console
 log_to_console = true
 
 # Format for private messages in chat
 # Available placeholders: <sender>, <recipient>, <message>
 # This format is used for both sender and recipient (but styled differently)
-format = "<white><sender><reset> <gray>><reset> <white><recipient><reset><gray>: <reset><message>"
+sender_format = "<gray>[<gold>Вы<gray> -> <green><recipient><gray>]: <reset><message>"
+recipient_format = "<gray>[<green><sender><gray> -> <gold>Вы<gray>]: <reset><message>"
 
 # Format for console logging
 console_log_format = "[PRIVATE] <sender> > <recipient>: <message>"
+
+# Messages
+players_only = "<red>Эта команда может использоваться только игроками."
+disabled = "<red>Приватные сообщения отключены."
+usage = "<red>Использование: /msg <игрок> <сообщение>"
+player_not_found = "<red>Игрок '<player>' не найден."
+self_message = "<red>Вы не можете отправить сообщение самому себе."
 
 [profanity]
 # Enable profanity filtering and banned word detection

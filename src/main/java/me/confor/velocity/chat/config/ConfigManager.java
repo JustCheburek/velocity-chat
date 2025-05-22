@@ -134,12 +134,15 @@ public class ConfigManager {
     }
 
     private void initConfigSections() {
+        // Updated ChatConfig with new messages
         chatConfig = new ChatConfig(
                 toml.getBoolean("chat.enable", true),
                 toml.getBoolean("chat.log_to_console", false),
                 toml.getBoolean("chat.passthrough", true),
                 toml.getBoolean("chat.parse_player_messages", false),
-                toml.getString("chat.format", "<<player>> <message>")
+                toml.getString("chat.format", "<<player>> <message>"),
+                toml.getString("chat.no_permission", "<red>У вас нет прав для выполнения этой команды."),
+                toml.getString("chat.config_reloaded", "<green>Конфигурация плагина Chat успешно перезагружена.")
         );
 
         urlConfig = new UrlConfig(
@@ -183,11 +186,27 @@ public class ConfigManager {
                 toml.getString("mentions.subtitle", "<yellow><player> упомянул вас")
         );
 
+        // Updated PrivateMessageConfig with new fields
+        List<String> defaultAliases = Arrays.asList("msg", "tell", "pm", "w", "message");
         privateMessageConfig = new PrivateMessageConfig(
                 toml.getBoolean("private_messages.enable", true),
+                toml.getList("private_messages.aliases", defaultAliases),
                 toml.getBoolean("private_messages.log_to_console", true),
-                toml.getString("private_messages.format", "<white><sender><reset> <gray>><reset> <white><recipient><reset><gray>: <reset><message>"),
-                toml.getString("private_messages.console_log_format", "[PRIVATE] <sender> -> <recipient>: <message>")
+                toml.getString("private_messages.sender_format",
+                        "<gray>[<gold>Вы<gray> -> <green><recipient><gray>]: <reset><message>"),
+                toml.getString("private_messages.recipient_format",
+                        "<gray>[<green><sender><gray> -> <gold>Вы<gray>]: <reset><message>"),
+                toml.getString("private_messages.console_log_format", "[PRIVATE] <sender> -> <recipient>: <message>"),
+                toml.getString("private_messages.players_only",
+                        "<red>Эта команда может использоваться только игроками."),
+                toml.getString("private_messages.disabled",
+                        "<red>Приватные сообщения отключены."),
+                toml.getString("private_messages.usage",
+                        "<red>Использование: /msg <игрок> <сообщение>"),
+                toml.getString("private_messages.player_not_found",
+                        "<red>Игрок '<player>' не найден."),
+                toml.getString("private_messages.self_message",
+                        "<red>Вы не можете отправить сообщение самому себе.")
         );
 
         // Initialize profanity config with default word lists

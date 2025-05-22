@@ -7,8 +7,10 @@ import me.confor.velocity.chat.config.ConfigManager;
 import me.confor.velocity.chat.filters.ProfanityFilter;
 import me.confor.velocity.chat.util.MessageFormatter;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.slf4j.Logger;
+
+import java.util.List;
 
 /**
  * Manages and registers all commands for the plugin
@@ -18,12 +20,14 @@ public class CommandManager {
     private final ProxyServer server;
     private final ConfigManager configManager;
     private final Logger logger;
+    private final MiniMessage miniMessage;
 
     public CommandManager(ChatPlugin plugin, ProxyServer server, ConfigManager configManager, Logger logger) {
         this.plugin = plugin;
         this.server = server;
         this.configManager = configManager;
         this.logger = logger;
+        this.miniMessage = MiniMessage.miniMessage();
     }
 
     /**
@@ -45,7 +49,13 @@ public class CommandManager {
                 server, configManager, messageFormatter, profanityFilter, logger
         );
 
-        server.getCommandManager().register("msg", privateMessageCommand, "tell", "pm", "w");
+        // Register private message command with aliases from config
+        List<String> aliases = configManager.getPrivateMessageConfig().getAliases();
+        if (!aliases.isEmpty()) {
+            String primaryCommand = aliases.get(0);
+            String[] aliasArray = aliases.subList(1, aliases.size()).toArray(new String[0]);
+            server.getCommandManager().register(primaryCommand, privateMessageCommand, aliasArray);
+        }
     }
 
     /**
@@ -55,14 +65,14 @@ public class CommandManager {
         @Override
         public void execute(Invocation invocation) {
             if (!invocation.source().hasPermission("chat.reload")) {
-                invocation.source().sendMessage(Component.text("You don't have permission to use this command.")
-                        .color(NamedTextColor.RED));
+                Component message = miniMessage.deserialize(configManager.getChatConfig().getNoPermissionMessage());
+                invocation.source().sendMessage(message);
                 return;
             }
 
             configManager.loadConfig();
-            invocation.source().sendMessage(Component.text("Chat plugin configuration reloaded successfully.")
-                    .color(NamedTextColor.GREEN));
+            Component message = miniMessage.deserialize(configManager.getChatConfig().getConfigReloadedMessage());
+            invocation.source().sendMessage(message);
             logger.info("Configuration reloaded by {}", invocation.source().toString());
         }
 

@@ -56,7 +56,7 @@ public class MentionProcessor {
             if (mentioned.isPresent() && !mentioned.get().equals(sender)) {
                 // Replace the mention with colored version using the actual player's username
                 String actualUsername = mentioned.get().getUsername();
-                String replacement = config.getColor() + "@" + actualUsername;
+                String replacement = config.getColor() + "@" + actualUsername + "<reset>";
                 matcher.appendReplacement(processedMessage, Matcher.quoteReplacement(replacement));
                 mentionedPlayers.add(mentioned.get());
             } else {
@@ -79,13 +79,12 @@ public class MentionProcessor {
      */
     private void sendMentionNotification(Player mentioned, Player sender) {
         try {
-            // Send title
-            Component title = miniMessage.deserialize(
-                    config.getTitleText().replace("<player>", sender.getUsername())
-            );
-            Component subtitle = miniMessage.deserialize(
-                    config.getSubtitleText().replace("<player>", sender.getUsername())
-            );
+            // Send title and subtitle
+            String titleText = config.getTitleText().replace("<player>", sender.getUsername());
+            String subtitleText = config.getSubtitleText().replace("<player>", sender.getUsername());
+
+            Component title = miniMessage.deserialize(titleText);
+            Component subtitle = miniMessage.deserialize(subtitleText);
 
             Title titleMessage = Title.title(
                     title,

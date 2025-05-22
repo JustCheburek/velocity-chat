@@ -1,29 +1,82 @@
 package me.confor.velocity.chat.config;
 
+import java.util.List;
+
 /**
  * Configuration for private messaging
  */
 public class PrivateMessageConfig extends BaseConfig {
+    private final List<String> aliases;
     private final boolean logToConsole;
-    private final String format;
+    private final String senderFormat;
+    private final String recipientFormat;
     private final String consoleLogFormat;
-    
-    public PrivateMessageConfig(boolean enabled, boolean logToConsole, String format, String consoleLogFormat) {
+    private final String playersOnlyMessage;
+    private final String disabledMessage;
+    private final String usageMessage;
+    private final String playerNotFoundMessage;
+    private final String selfMessageMessage;
+
+    public PrivateMessageConfig(boolean enabled, List<String> aliases, boolean logToConsole,
+                                String senderFormat, String recipientFormat, String consoleLogFormat,
+                                String playersOnlyMessage, String disabledMessage, String usageMessage,
+                                String playerNotFoundMessage, String selfMessageMessage) {
         super(enabled);
+        this.aliases = aliases;
         this.logToConsole = logToConsole;
-        this.format = format;
+        this.senderFormat = senderFormat;
+        this.recipientFormat = recipientFormat;
         this.consoleLogFormat = consoleLogFormat;
+        this.playersOnlyMessage = playersOnlyMessage;
+        this.disabledMessage = disabledMessage;
+        this.usageMessage = usageMessage;
+        this.playerNotFoundMessage = playerNotFoundMessage;
+        this.selfMessageMessage = selfMessageMessage;
     }
-    
+
+    public List<String> getAliases() {
+        return aliases;
+    }
+
     public boolean shouldLogToConsole() {
         return logToConsole;
     }
-    
-    public String getFormat() {
-        return format;
+
+    public String getSenderFormat() {
+        return senderFormat;
     }
-    
+
+    public String getRecipientFormat() {
+        return recipientFormat;
+    }
+
     public String getConsoleLogFormat() {
         return consoleLogFormat;
+    }
+
+    public String getPlayersOnlyMessage() {
+        return playersOnlyMessage;
+    }
+
+    public String getDisabledMessage() {
+        return disabledMessage;
+    }
+
+    public String getUsageMessage() {
+        return usageMessage;
+    }
+
+    public String getPlayerNotFoundMessage() {
+        return playerNotFoundMessage;
+    }
+
+    public String getSelfMessageMessage() {
+        return selfMessageMessage;
+    }
+
+    // Backward compatibility methods
+    @Deprecated
+    public String getFormat() {
+        return senderFormat;
     }
 }
