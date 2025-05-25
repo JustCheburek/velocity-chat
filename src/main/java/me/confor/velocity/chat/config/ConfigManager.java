@@ -137,10 +137,10 @@ public class ConfigManager {
         // Updated ChatConfig with new messages
         chatConfig = new ChatConfig(
                 toml.getBoolean("chat.enable", true),
-                toml.getBoolean("chat.log_to_console", false),
+                toml.getBoolean("chat.log_to_console", true),
                 toml.getBoolean("chat.passthrough", true),
-                toml.getBoolean("chat.parse_player_messages", false),
-                toml.getString("chat.format", "<<player>> <message>"),
+                toml.getBoolean("chat.parse_player_messages", true),
+                toml.getString("chat.format", "<player> <gray>> <reset><message>"),
                 toml.getString("chat.no_permission", "<red>У вас нет прав для выполнения этой команды."),
                 toml.getString("chat.config_reloaded", "<green>Конфигурация плагина Chat успешно перезагружена.")
         );
@@ -151,31 +151,31 @@ public class ConfigManager {
         );
 
         joinConfig = new JoinConfig(
-                toml.getBoolean("join.enable", false),
-                toml.getBoolean("join.passthrough", false),
-                toml.getString("join.format", "<yellow><player> joined <server></yellow>")
+                toml.getBoolean("join.enable", true),
+                toml.getBoolean("join.passthrough", true),
+                toml.getString("join.format", "<gray>[<green>➕<gray>] <green><player>")
         );
 
         firstJoinConfig = new FirstJoinConfig(
                 toml.getBoolean("first_join.enable", true),
-                toml.getBoolean("first_join.passthrough", false),
-                toml.getString("first_join.format", "<green>Welcome <player> to <server> for the first time!</green>")
+                toml.getBoolean("first_join.passthrough", true),
+                toml.getString("first_join.format", "<gray>[<red>❗<gray>] <green><player>")
         );
 
         leaveConfig = new LeaveConfig(
-                toml.getBoolean("leave.enable", false),
-                toml.getBoolean("leave.passthrough", false),
-                toml.getString("leave.format", "<yellow><player> left <server></yellow>")
+                toml.getBoolean("leave.enable", true),
+                toml.getBoolean("leave.passthrough", true),
+                toml.getString("leave.format", "<gray>[<red>➖<gray>] <red><player>")
         );
 
         switchConfig = new SwitchConfig(
                 toml.getBoolean("switch.enable", true),
-                toml.getString("switch.format", "<yellow><player> switched from <previous_server> to <server></yellow>")
+                toml.getString("switch.format", "<gray>[<aqua>🔁<gray>] <aqua><player></aqua>: <yellow><previous_server> <gray>-> <aqua><server>")
         );
 
         disconnectConfig = new DisconnectConfig(
                 toml.getBoolean("disconnect.enable", true),
-                toml.getString("disconnect.format", "<yellow><player> was disconnected</yellow>")
+                toml.getString("disconnect.format", "<gray>[<red>➖<gray>] <yellow><player>")
         );
 
         mentionConfig = new MentionConfig(
@@ -196,7 +196,7 @@ public class ConfigManager {
                         "<gray>[<gold>Вы<gray> -> <green><recipient><gray>]: <reset><message>"),
                 toml.getString("private_messages.recipient_format",
                         "<gray>[<green><sender><gray> -> <gold>Вы<gray>]: <reset><message>"),
-                toml.getString("private_messages.console_log_format", "[PRIVATE] <sender> -> <recipient>: <message>"),
+                toml.getString("private_messages.console_log_format", "[PRIVATE] <sender> > <recipient>: <message>"),
                 toml.getString("private_messages.players_only",
                         "<red>Эта команда может использоваться только игроками."),
                 toml.getString("private_messages.disabled",
@@ -211,10 +211,20 @@ public class ConfigManager {
 
         // Initialize profanity config with default word lists
         List<String> defaultProfanityWords = Arrays.asList(
-                "ахуе", "бля", "еба", "ёба", "нахуй", "пизд", "хуй", "хую", "сука", "блят",
-                "ганд", "даун", "дибил", "долбаёб", "долбаоб", "канцлагер",
-                "концлагер", "конча", "конче", "мраз", "нига", "пидор", "пидр",
-                "уеб", "уёб", "хентай", "чечен", "чмо", "фашист", "нацист"
+                "ахуе*", "бля*", "ганд*", "даун*", "дибил*",
+                "долбаёб", "долбаоб", "еба*", "ёба*",
+                "канцлагер*", "концлагер*", "конча*", "конче*",
+                "мраз*", "нахуй", "нига",
+                "пидор*", "пидр*", "пизд*",
+                "уеб*", "уёб*", "хентай",
+                "*хуй*", "*хую*",
+                "чечен*", "чмо",
+                "nigg*", "fag*", "tranny*", "retard*", "kike*",
+                "spic*", "chink*", "gook*", "raghead*", "beaner*",
+                "wetback*", "whore*", "bitch*", "slut*", "bastard*",
+                "ass*", "dick*", "cock*", "piss*", "cum*",
+                "kill yourself", "kys", "killurself",
+                "suicide*", "suicidal*"
         );
 
         profanityConfig = new ProfanityConfig(
