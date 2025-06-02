@@ -24,7 +24,7 @@ minebridge9 = "mb9"
 [discord]
 # Bot token from https://discordapp.com/developers/applications/
 # Not server overridable
-token = "REDACTED"
+token = ""
 # Default channel ID to send Minecraft chat messages to
 channel = "1317024816037105665"
 
