@@ -111,6 +111,9 @@ aliases = ["msg", "tell", "pm", "w", "message"]
 # Log private messages to console
 log_to_console = true
 
+# Sound to play when receiving a private message (minecraft sound name)
+sound = "minecraft:entity.experience_orb.pickup"
+
 # Format for private messages in chat
 # Available placeholders: <sender>, <recipient>, <message>
 # This format is used for both sender and recipient (but styled differently)

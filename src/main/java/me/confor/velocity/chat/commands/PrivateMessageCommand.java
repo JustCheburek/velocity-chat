@@ -7,6 +7,8 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import me.confor.velocity.chat.config.ConfigManager;
 import me.confor.velocity.chat.filters.ProfanityFilter;
 import me.confor.velocity.chat.util.MessageFormatter;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.slf4j.Logger;
@@ -100,6 +102,9 @@ public class PrivateMessageCommand implements SimpleCommand {
         // Send messages
         sender.sendMessage(senderMessage);
         target.get().sendMessage(recipientMessage);
+        
+        // Play notification sound for recipient
+        playNotificationSound(target.get());
 
         // Log to console if enabled
         if (configManager.getPrivateMessageConfig().shouldLogToConsole()) {
@@ -108,6 +113,35 @@ public class PrivateMessageCommand implements SimpleCommand {
                     .replace("<recipient>", target.get().getUsername())
                     .replace("<message>", filteredMessage);
             logger.info(logMessage);
+        }
+    }
+    
+    /**
+     * Play notification sound to the recipient
+     */
+    private void playNotificationSound(Player player) {
+        try {
+            String soundName = configManager.getPrivateMessageConfig().getNotificationSound();
+
+            // Ensure sound name is properly formatted
+            if (!soundName.contains(":")) {
+                soundName = "minecraft:" + soundName;
+            }
+
+            Key soundKey = Key.key(soundName.toLowerCase());
+            Sound sound = Sound.sound(soundKey, Sound.Source.MASTER, 1.0f, 1.0f);
+            player.playSound(sound);
+
+        } catch (Exception e) {
+            try {
+                // Fallback to default sound if the configured sound is invalid
+                Key soundKey = Key.key("minecraft:entity.experience_orb.pickup");
+                Sound sound = Sound.sound(soundKey, Sound.Source.MASTER, 1.0f, 1.0f);
+                player.playSound(sound);
+            } catch (Exception fallbackError) {
+                // If even fallback fails, just log and continue
+                logger.warn("Could not play private message notification sound: " + fallbackError.getMessage());
+            }
         }
     }
 

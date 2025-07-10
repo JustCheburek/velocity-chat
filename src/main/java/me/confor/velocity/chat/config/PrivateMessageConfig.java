@@ -16,11 +16,13 @@ public class PrivateMessageConfig extends BaseConfig {
     private final String usageMessage;
     private final String playerNotFoundMessage;
     private final String selfMessageMessage;
+    private final String notificationSound;
 
     public PrivateMessageConfig(boolean enabled, List<String> aliases, boolean logToConsole,
                                 String senderFormat, String recipientFormat, String consoleLogFormat,
                                 String playersOnlyMessage, String disabledMessage, String usageMessage,
-                                String playerNotFoundMessage, String selfMessageMessage) {
+                                String playerNotFoundMessage, String selfMessageMessage,
+                                String notificationSound) {
         super(enabled);
         this.aliases = aliases;
         this.logToConsole = logToConsole;
@@ -32,6 +34,7 @@ public class PrivateMessageConfig extends BaseConfig {
         this.usageMessage = usageMessage;
         this.playerNotFoundMessage = playerNotFoundMessage;
         this.selfMessageMessage = selfMessageMessage;
+        this.notificationSound = notificationSound;
     }
 
     public List<String> getAliases() {
@@ -72,6 +75,10 @@ public class PrivateMessageConfig extends BaseConfig {
 
     public String getSelfMessageMessage() {
         return selfMessageMessage;
+    }
+    
+    public String getNotificationSound() {
+        return notificationSound;
     }
 
     // Backward compatibility methods

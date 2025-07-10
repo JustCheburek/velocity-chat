@@ -206,7 +206,8 @@ public class ConfigManager {
                 toml.getString("private_messages.player_not_found",
                         "<red>Игрок '<player>' не найден."),
                 toml.getString("private_messages.self_message",
-                        "<red>Вы не можете отправить сообщение самому себе.")
+                        "<red>Вы не можете отправить сообщение самому себе."),
+                toml.getString("private_messages.sound", "minecraft:entity.experience_orb.pickup")
         );
 
         // Initialize profanity config with default word lists
