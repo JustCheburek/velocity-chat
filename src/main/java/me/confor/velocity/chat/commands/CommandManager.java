@@ -45,16 +45,35 @@ public class CommandManager {
         MessageFormatter messageFormatter = new MessageFormatter();
         ProfanityFilter profanityFilter = new ProfanityFilter(logger);
 
-        PrivateMessageCommand privateMessageCommand = new PrivateMessageCommand(
-                server, configManager, messageFormatter, profanityFilter, logger
+        // Register the main chat command which can act as a fallback
+        server.getCommandManager().register(
+                "chat",
+                new ChatCommand(server, configManager, messageFormatter, profanityFilter, logger)
         );
 
         // Register private message command with aliases from config
+        // First unregister any existing commands to avoid conflicts
         List<String> aliases = configManager.getPrivateMessageConfig().getAliases();
-        if (!aliases.isEmpty()) {
-            String primaryCommand = aliases.get(0);
-            String[] aliasArray = aliases.subList(1, aliases.size()).toArray(new String[0]);
-            server.getCommandManager().register(primaryCommand, privateMessageCommand, aliasArray);
+        for (String cmd : aliases) {
+            try {
+                // Try to unregister existing command first
+                server.getCommandManager().unregister(cmd);
+                logger.debug("Unregistered existing command: {}", cmd);
+            } catch (Exception e) {
+                logger.debug("No existing command to unregister for: {}", cmd);
+            }
+            
+            PrivateMessageCommand commandInstance = new PrivateMessageCommand(
+                    server, configManager, messageFormatter, profanityFilter, logger
+            );
+            
+            try {
+                server.getCommandManager().register(cmd, commandInstance);
+                logger.info("Successfully registered private message command: /{}", cmd);
+            } catch (Exception e) {
+                logger.error("Failed to register command '{}': {}. You can use '/chat {}' instead.", 
+                    cmd, e.getMessage(), cmd);
+            }
         }
     }
 
