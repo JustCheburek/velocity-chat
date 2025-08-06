@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 public class ConfigManager {
-    private static final long CURRENT_CONFIG_VERSION = 8;
+    private static final long CURRENT_CONFIG_VERSION = 10;
 
     private final Path dataDir;
     private final Logger logger;
@@ -142,7 +142,9 @@ public class ConfigManager {
                 toml.getBoolean("chat.parse_player_messages", true),
                 toml.getString("chat.format", "<player> <gray>> <reset><message>"),
                 toml.getString("chat.no_permission", "<red>У вас нет прав для выполнения этой команды."),
-                toml.getString("chat.config_reloaded", "<green>Конфигурация плагина Chat успешно перезагружена.")
+                toml.getString("chat.config_reloaded", "<green>Конфигурация плагина Chat успешно перезагружена."),
+                toml.getString("chat.player_click_command", "/playerinfo %player%"),
+                toml.getString("chat.player_hover_message", "Информация о игроке")
         );
 
         urlConfig = new UrlConfig(

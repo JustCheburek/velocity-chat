@@ -129,7 +129,9 @@ public class ChatListener {
                 playerName,
                 serverName,
                 processedMessage,
-                chatConfig.shouldParsePlayerMessages()
+                chatConfig.shouldParsePlayerMessages(),
+                chatConfig.getPlayerClickCommand(),
+                chatConfig.getPlayerHoverMessage()
         );
 
         // Apply URL formatting if enabled

@@ -1,6 +1,8 @@
 package me.confor.velocity.chat.util;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -34,6 +36,46 @@ public class MessageFormatter {
 
         // Add player placeholder
         placeholders.add(Placeholder.parsed("player", playerName));
+
+        // Add server placeholder
+        if (serverName != null) {
+            placeholders.add(Placeholder.parsed("server", serverName));
+        }
+
+        // Add message placeholder - either parsed or unparsed
+        if (parseMessage) {
+            placeholders.add(Placeholder.parsed("message", message));
+        } else {
+            placeholders.add(Placeholder.unparsed("message", message));
+        }
+
+        return miniMessage.deserialize(format, TagResolver.resolver(placeholders));
+    }
+
+    /**
+     * Format a chat message with interactive player component (click and hover events)
+     *
+     * @param format The format string with placeholders
+     * @param playerName The name of the player
+     * @param serverName The name of the server
+     * @param message The chat message
+     * @param parseMessage Whether to parse the message content for formatting
+     * @param clickCmd The command to execute when player name is clicked (%player% placeholder supported)
+     * @param hoverMsg The hover message to show when hovering over player name (supports MiniMessage formatting)
+     * @return The formatted component
+     */
+    public Component formatChatMessage(String format, String playerName, String serverName,
+                                       String message, boolean parseMessage, String clickCmd, String hoverMsg) {
+        List<TagResolver.Single> placeholders = new ArrayList<>();
+
+        // Create interactive player component
+        String cmd = clickCmd.replace("%player%", playerName);
+        Component playerComp = Component.text(playerName)
+                .clickEvent(ClickEvent.runCommand(cmd))
+                .hoverEvent(HoverEvent.showText(miniMessage.deserialize(hoverMsg)));
+        
+        // Add interactive player placeholder
+        placeholders.add(Placeholder.component("player", playerComp));
 
         // Add server placeholder
         if (serverName != null) {

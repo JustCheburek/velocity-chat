@@ -10,10 +10,13 @@ public class ChatConfig extends BaseConfig {
     private final String format;
     private final String noPermissionMessage;
     private final String configReloadedMessage;
+    private final String playerClickCommand;
+    private final String playerHoverMessage;
 
     public ChatConfig(boolean enabled, boolean logToConsole, boolean passthrough,
                       boolean parsePlayerMessages, String format,
-                      String noPermissionMessage, String configReloadedMessage) {
+                      String noPermissionMessage, String configReloadedMessage,
+                      String playerClickCommand, String playerHoverMessage) {
         super(enabled);
         this.logToConsole = logToConsole;
         this.passthrough = passthrough;
@@ -21,6 +24,8 @@ public class ChatConfig extends BaseConfig {
         this.format = format;
         this.noPermissionMessage = noPermissionMessage;
         this.configReloadedMessage = configReloadedMessage;
+        this.playerClickCommand = playerClickCommand;
+        this.playerHoverMessage = playerHoverMessage;
     }
 
     public boolean shouldLogToConsole() {
@@ -45,5 +50,13 @@ public class ChatConfig extends BaseConfig {
 
     public String getConfigReloadedMessage() {
         return configReloadedMessage;
+    }
+
+    public String getPlayerClickCommand() {
+        return playerClickCommand;
+    }
+
+    public String getPlayerHoverMessage() {
+        return playerHoverMessage;
     }
 }

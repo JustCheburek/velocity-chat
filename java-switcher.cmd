@@ -73,6 +73,10 @@ echo Testing new Java version:
 java -version
 
 echo.
+echo Running gradlew clean with new Java version...
+call .\gradlew clean
+echo.
+
 echo IMPORTANT: Restart command prompt for changes to fully apply.
 echo.
 
